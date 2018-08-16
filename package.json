@@ -1,0 +1,27 @@
+{
+  "name": "question-box-server",
+  "version": "1.0.0",
+  "description": "API & Push Server for Question Box",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedro-poblete/question-box-backend.git"
+  },
+  "keywords": [
+    "Express",
+    "API",
+    "question-box"
+  ],
+  "author": "Pedro Poblete Lasserre",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pedro-poblete/question-box-backend/issues"
+  },
+  "homepage": "https://github.com/pedro-poblete/question-box-backend#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
