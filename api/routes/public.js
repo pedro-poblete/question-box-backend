@@ -1,26 +1,21 @@
 const express = require('express')
 const router = express.Router()
 
-// Public Routes
-router.get('/', (req, res, next) => {
-  let acceptedLanguage = req.headers["accept-language"]
+const controller = require('../controllers/public')
 
-  if (req.query.search) {
-    let search = req.query.search
-  }
+// Public Route: Lists all answered questions
+router.get('/', controller.listAnsweredQuestions)
 
-  let response_body = {message: "Route for getting Questions and Answers, with Search and Language filters" }
-  res.status(200).json(response_body)
-})
+// Public Route: Send New Question
+router.post('/', controller.sendNewQuestion)
 
-// MAY NOT EVEN BE NECESSARY
-router.get('/:questionId', (req, res, next) => {
-  let acceptedLanguage = req.headers["accept-language"]
+// Public Route: Get details by Question Id
+router.get('/:questionId', controller.getSpecificQuestion)
 
-  res.status(200).json({
-    message: `Received question id #${req.params.questionId}`
-  })
-})
+// Public Route: Add additional details to question
+router.patch('/:questionId', controller.addAdditionalDetails)
 
+// Public Route: Update Question Number of Views
+router.patch('/:questionId/update_views', controller.updateNumberOfViews)
 
 module.exports = router

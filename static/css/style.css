@@ -1,0 +1,57 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+  background: #00a9f7;
+  color: #ffffff;
+  font-size: 21px;
+}
+
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 700px;
+}
+
+h1 {
+  font-size: 2em;
+  font-weight: 600;
+  margin-top: 125px;
+  margin-bottom: 10px;
+}
+
+p {
+  margin-top: 0;
+  line-height: 1.5;
+}
+
+a {
+  color: #424242;
+  text-decoration: none;
+}
+
+.cta {
+  margin-top: 64px;
+}
+
+.cta img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.indent {
+  margin-left: 40px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 2em;
+  width: inherit;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
