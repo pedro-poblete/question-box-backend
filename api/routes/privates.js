@@ -1,33 +1,6 @@
 const express = require('express')
 const router = express.Router()
 
-// LIST AND POST VIEW FOR QUESTIONS
-router.get('/', (req, res, next) => {
-  let response_body = {message: "Route for getting a list of all questions" }
-  res.status(200).json(response_body)
-})
-
-router.post('/', (req, res, next) => {
-  let response_body = {message: "Route for uploading a new question" }
-  res.status(200).json(response_body)
-})
-
-// GET, PATCH, AND DELETE FOR SPECIFIC QUESTION
-router.get('/:questionId', (req, res, next) => {
-  let response_body = {message: "Route for getting all details of a specific question" }
-  res.status(200).json(response_body)
-})
-
-router.patch('/:questionId', (req, res, next) => {
-  let response_body = {message: "Route for updating question details" }
-  res.status(200).json(response_body)
-})
-
-router.delete('/:questionId', (req, res, next) => {
-  let response_body = {message: "Route for deleting a specific question" }
-  res.status(200).json(response_body)
-})
-
 // GET, POST, PUT, PATCH, DELETE FOR SPECIFIC ANSWER
 router.get('/:questionId/answer', (req, res, next) => {
   let response_body = {message: "Route for getting the specific details of the answer to that question" }
