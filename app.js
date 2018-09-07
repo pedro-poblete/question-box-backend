@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
@@ -20,10 +22,11 @@ app.use( (req, res, next) => {
   next()
 } )
 
-const publicRoutes =  require('./api/routes/public')
-const privateRoutes = require('./api/routes/privates')
+const questionsRoutes =  require('./api/routes/questions')
+const privateRoutes = require('./api/routes/private')
+const userRoutes = require('./api/routes/users')
 
-app.use('/public', publicRoutes)
-app.use('/private', privateRoutes)
+app.use('/questions', questionsRoutes)
+app.use('/users', userRoutes)
 
 app.listen(port, () => console.log(`App running in port ${port}`))
