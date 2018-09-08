@@ -22,6 +22,7 @@ function publicFields(questionSet) {
 }
 
 exports.listAnsweredQuestions = (req, res, next) => {
+  return res.status(200).json(Object.getOwnPropertyNames(this))
   try {
     const answered_questions = db.get('questions').cloneDeep()
     .filter('answer', null)
@@ -77,36 +78,6 @@ exports.sendNewQuestion = (req, res, next) => {
     }
   }
 
-  catch (err) {
-    return res.status(500).json({
-      error: err.toString()
-    })
-  }
-}
-
-exports.getSpecificQuestion = (req, res, next) => {
-  try {
-    const question = db.get('questions')
-    .find({ id : req.params.questionId }).cloneDeep()
-    .value()
-
-    if (question) {
-      return res.status(200).json({
-        id : question.id,
-        text : question.text,
-        date_asked : question.date_asked,
-        number_of_views : question.number_of_views,
-        answer : question.answer,
-        media : question.media
-      }
-      )
-    }
-    else {
-      return res.status(404).json({
-        error: "Question not found."
-      })
-    }
-  }
   catch (err) {
     return res.status(500).json({
       error: err.toString()
@@ -212,6 +183,183 @@ exports.subscribeEmail = (req, res, next) => {
     else {
       return res.status(404).json({
         error: "Question not found."
+      })
+    }
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+exports.listAllQuestions = (req, res, next) => {
+  try {
+    const answered_questions = db.get('questions').cloneDeep()
+    .value()
+
+    return res.status(200).json(
+      answered_questions
+    )
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+
+exports.getSpecificQuestion = (req, res, next) => {
+  try {
+    const question = db.get('questions')
+    .find({ id : req.params.questionId }).cloneDeep()
+    .value()
+
+    if (question) {
+      return res.status(200).json(
+        question
+      )
+    }
+    else {
+      return res.status(404).json({
+        error: "Question not found."
+      })
+    }
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+
+exports.modifyQuestion = (req, res, next) => {
+  try {
+    const question = db.get('questions')
+    .find({ id : req.params.questionId }).cloneDeep()
+    .value()
+
+    if (question) {
+      let payload = {}
+
+      if (req.body.text) {
+        payload["text"] = {}
+        if (req.body.text.en) {
+          payload["text"]["en"] = req.body.text.en
+        }
+        if (req.body.text.de) {
+          payload["text"]["de"] = req.body.text.de
+        }
+      }
+      if (req.body.date_asked) {
+        payload["date_asked"] = req.body.date_asked
+      }
+      if (req.body.number_of_views) {
+        payload["number_of_views"] = req.body.number_of_views
+      }
+      if (req.body.asker_age) {
+        payload["asker_age"] = req.body.asker_age
+      }
+      if (Object.keys(payload).length) {
+
+        const question = db.get('questions')
+        .find({ id : req.params.questionId })
+        .assign(payload)
+        .write()
+
+        return res.status(200).json(
+          question
+        )
+      } else {
+        return res.status(400).json({
+          error : "Empty payload. No changes submitted."
+        })
+      }
+    } else {
+      return res.status(404).json({
+        error: "Question not found."
+      })
+    }
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+exports.deleteQuestion = (req, res, next) => {
+  try {
+    let question = db.get('questions')
+    .find({ id : req.params.questionId })
+    .cloneDeep()
+    .value()
+
+    if (question) {
+      db.get('questions')
+      .remove({ id : req.params.questionId })
+      .write()
+
+      return res.status(200).json({
+        message: "Question Deleted."
+      })
+    } else {
+      return res.status(404).json({
+        message: "Question does not exists."
+      })
+    }
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+exports.submitOrUpdateAnswer = (req, res, next) => {
+  try {
+    const question = db.get('questions')
+    .find({ id : req.params.questionId }).cloneDeep()
+    .value()
+
+    // TODO: REVIEW WHEN FINAL MODEL FOR ANSWER IS DEFINED
+    if (question) {
+      db.get('questions')
+      .find( {id : req.params.questionId} )
+      .asign({
+        answer : req.body.answer
+      })
+      .write()
+    } else {
+      return res.status(404).json({
+        error : "Question does not exists."
+      })
+    }
+  }
+  catch (err) {
+    return res.status(500).json({
+      error: err.toString()
+    })
+  }
+}
+
+exports.deleteAnswer = (req, res, next) => {
+  try {
+    const question = db.get('questions')
+    .find({ id : req.params.questionId }).cloneDeep()
+    .value()
+
+    // TODO: REVIEW WHEN FINAL MODEL FOR ANSWER IS DEFINED
+    if (question) {
+      db.get('questions')
+      .find( {id : req.params.questionId} )
+      .unset('questions.answer')
+      .write()
+    } else {
+      return res.status(404).json({
+        error : "Question does not exists."
       })
     }
   }
