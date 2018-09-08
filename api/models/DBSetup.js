@@ -5,7 +5,12 @@ const bcrypt = require('bcrypt')
 const Cryptr = require('cryptr')
 const cryptr = new Cryptr(process.env.CRYPTRKEY)
 
-const adapter = new FileSync(process.env.LOWDBFILE)
+// if (config.util.getEnv('NODE_ENV') !== 'test') {
+  const adapter = new FileSync(process.env.LOWDBFILE)
+// } else {
+//   const adapter = new FileSync('db_test.json')
+// }
+
 const db = low(adapter)
 const shortid = require('shortid')
 
@@ -13,7 +18,7 @@ exports.initialize = function() {
   if ( db.has('questions').value() ) {
     console.log("Database has data, no need to initialize it.")
   } else {
-    let emptyState = require('../../schema.json')
+    let emptyState = require('../../db_schema.json')
     db.setState(emptyState).write()
     console.log("Database Initialized.")
   }
