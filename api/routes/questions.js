@@ -26,17 +26,14 @@ router.get('/all', checkAuth, controller.listAllQuestions)
 // Private Route: Get details by Question Id
 router.get('/:questionId', checkAuth, controller.getSpecificQuestion)
 
-// Private Route: Modify question details
+// Private Route: Modify question details REVIEW: MAYBE CHANGE PATH, ITS A BIT CONFUSING
 router.patch('/:questionId/modify', checkAuth, controller.modifyQuestion)
 
 // Private Route: Delete Question
 router.delete('/:questionId/', checkAuth, controller.deleteQuestion)
 
-// Private Route: Submit an answer to a question
-router.post('/:questionId/answer', checkAuth, controller.submitOrUpdateAnswer)
-
 // Private Route: Submit additional information / modify answer
-router.patch('/:questionId/answer', checkAuth, controller.submitOrUpdateAnswer)
+router.put('/:questionId/answer', checkAuth, controller.submitOrUpdateAnswer)
 
 // Private Route: Delete Answer
 router.delete('/:questionId/answer', checkAuth, controller.deleteAnswer)

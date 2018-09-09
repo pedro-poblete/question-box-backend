@@ -1,7 +1,6 @@
 const validator = require('validator');
-const Cryptr = require('cryptr');
-const cryptr = new Cryptr(process.env.CRYPTRKEY);
 
+const cryptr = require('../models/DBcontroller').cryptr
 
 exports.encryptEmail = (req, res, next) => {
   if (!req.body.email) {

@@ -1,12 +1,7 @@
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-
-const Cryptr = require('cryptr')
-const cryptr = new Cryptr(process.env.CRYPTRKEY)
-
-const adapter = new FileSync(process.env.LOWDBFILE)
-const db = low(adapter)
 const shortid = require('shortid')
+
+const cryptr = require('../models/DBcontroller').cryptr
+const db = require('../models/DBcontroller').db
 
 function publicFields(questionSet) {
   let output = questionSet.map(el => {
@@ -22,7 +17,6 @@ function publicFields(questionSet) {
 }
 
 exports.listAnsweredQuestions = (req, res, next) => {
-  return res.status(200).json(Object.getOwnPropertyNames(this))
   try {
     const answered_questions = db.get('questions').cloneDeep()
     .filter('answer', null)
@@ -60,7 +54,7 @@ exports.sendNewQuestion = (req, res, next) => {
         number_of_views: 0,
         additional_details: req.body.additional_details,
         related_question: req.body.related_question,
-        date: Date.now(),
+        date_asked: Date.now(),
         asker_age: req.body.asker_age
       })
       .write()
@@ -135,10 +129,13 @@ exports.updateNumberOfViews = (req, res, next) => {
       question.number_of_views += 1
       db.write()
 
-      return res.status(200).json(
-        publicFields(question)
-      )
-
+      return res.status(200).json({
+        id: question.id,
+        text : question.text,
+        date_asked : question.date_asked,
+        number_of_views : question.number_of_views,
+        answer : question.answer
+      })
     } else {
       return res.status(404).json({
         error: "Question not found."
@@ -248,9 +245,13 @@ exports.modifyQuestion = (req, res, next) => {
         payload["text"] = {}
         if (req.body.text.en) {
           payload["text"]["en"] = req.body.text.en
+        } else if (question.text.en) {
+          payload["text"]["en"] = question.text.en
         }
         if (req.body.text.de) {
           payload["text"]["de"] = req.body.text.de
+        } else if (question.text.de) {
+          payload["text"]["de"] = question.text.de
         }
       }
       if (req.body.date_asked) {
@@ -321,17 +322,18 @@ exports.deleteQuestion = (req, res, next) => {
 exports.submitOrUpdateAnswer = (req, res, next) => {
   try {
     const question = db.get('questions')
-    .find({ id : req.params.questionId }).cloneDeep()
+    .find({ id : req.params.questionId })
     .value()
 
     // TODO: REVIEW WHEN FINAL MODEL FOR ANSWER IS DEFINED
     if (question) {
       db.get('questions')
       .find( {id : req.params.questionId} )
-      .asign({
-        answer : req.body.answer
-      })
+      .set('answer', req.body.answer)
       .write()
+
+      return res.status(200).json(question)
+
     } else {
       return res.status(404).json({
         error : "Question does not exists."
@@ -348,15 +350,25 @@ exports.submitOrUpdateAnswer = (req, res, next) => {
 exports.deleteAnswer = (req, res, next) => {
   try {
     const question = db.get('questions')
-    .find({ id : req.params.questionId }).cloneDeep()
+    .find({ id : req.params.questionId })
     .value()
 
     // TODO: REVIEW WHEN FINAL MODEL FOR ANSWER IS DEFINED
     if (question) {
-      db.get('questions')
-      .find( {id : req.params.questionId} )
-      .unset('questions.answer')
-      .write()
+      if (question.answer) {
+        db.get('questions')
+        .find( {id : req.params.questionId} )
+        .unset('answer')
+        .write()
+
+        return res.status(200).json(
+          question
+        )
+      } else {
+        return res.status(404).json({
+          error: "Answer does not exists."
+        })
+      }
     } else {
       return res.status(404).json({
         error : "Question does not exists."
