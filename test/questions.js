@@ -248,6 +248,7 @@ describe('Questions', () => {
         done()
       })
     })
+    // TODO: ADD A TEST TO CHECK IF NOTIFICATIONS ARE SENT
   })
   describe('/questionId/answer delete tests', () => {
     it('it should commit changes and delete the answer ', (done) => {

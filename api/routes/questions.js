@@ -4,6 +4,7 @@ const router = express.Router()
 const controller = require('../controllers/questions')
 const emailChecks = require('../middleware/email')
 const checkAuth = require('../middleware/check-auth')
+const sendNotification = require('../middleware/sendNotification')
 
 // Public Route: Lists all answered questions
 router.get('/', controller.listAnsweredQuestions)

@@ -3,6 +3,8 @@ const shortid = require('shortid')
 const cryptr = require('../models/DBcontroller').cryptr
 const db = require('../models/DBcontroller').db
 
+transporter = require('../../notifications/email.js')
+
 function publicFields(questionSet) {
   let output = questionSet.map(el => {
     return {
@@ -332,7 +334,43 @@ exports.submitOrUpdateAnswer = (req, res, next) => {
       .set('answer', req.body.answer)
       .write()
 
-      return res.status(200).json(question)
+      emailNotification = db.get('email_notifications')
+      .find( {question_id : question.id} )
+      .value()
+
+      // TODO: NEED TO REVIEW WHAT'S THE BEST WAY OF CONTROLLING FOR LANGUAGE. DO I ADD IT TO THE NOTIFICATIONS MODEL? DO I CALCULATE IT FROM THE LANGUAGE OF THE QUESTION OR THE LANGUAGE OF THE ANSWER?
+      // TODO: SHOULD I CREATE A DIFFERENT CONTROLLER FOR THE NOTIFICATIONS? IS IT OK TO DO IT AS A MIDDLEWARE?
+      if (emailNotification) {
+        let receiver = cryptr.decrypt(emailNotification.email)
+        let questionText
+        let lang
+        if (question.text.en) {
+          questionText = question.text.en
+          lang = 'en'
+        } else if (question.text.de) {
+          questionText = question.text.de
+          lang = 'de'
+        } else {
+          return res.status(500).json({
+            error: "Question Text Invalid. Please contact administrator."
+          })
+        }
+        try {
+          transporter.sendEmail(receiver, questionText, lang)
+          db.get('email_notifications')
+          .remove( {question_id : question.id} )
+          .write()
+          return res.status(200).json(question)
+        }
+        catch (err) {
+          return res.status(500).json({
+            error: err.toString()
+          })
+        }
+
+      } else {
+        return res.status(200).json(question)
+      }
 
     } else {
       return res.status(404).json({
