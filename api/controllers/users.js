@@ -1,19 +1,9 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const shortid = require('shortid')
 
 const cryptr = require('../models/DBcontroller').cryptr
-const db = require('../models/DBcontroller').db
 
-// FUNCTIONS
-function getUser(userSet, email) {
-  return userSet.forEach ( (user) => {
-    user.email = cryptr.decrypt(user.email)
-  })
-  .find({ email : cryptr.decrypt(email)})
-  .value()
-}
-
+const usersModel = require('../models/users')
 
 exports.userLogin = (req, res, next) => {
   try {
@@ -23,8 +13,7 @@ exports.userLogin = (req, res, next) => {
       })
     }
 
-    const users = db.get('users').cloneDeep()
-    const user = getUser(users, req.body.email)
+    const user = usersModel.getUser(req.body.email)
 
     if ( user ) {
       bcrypt.compare(req.body.password, user.password, (err, result) => {
@@ -75,15 +64,15 @@ exports.userRegister = (req, res, next) => {
       })
     }
 
-    if (!req.body.password) {
+    if (!req.body.password || !req.body.email) {
       return res.status(400).json({
         error: "Bad input, please send both email and password."
       })
     }
 
-    const users = db.get('users').cloneDeep()
+    const user = usersModel.getUser(req.body.email)
 
-    if ( getUser(users, req.body.email) ) {
+    if ( user ) {
       return res.status(409).json({
         error: "User already exists."
       })
@@ -94,18 +83,21 @@ exports.userRegister = (req, res, next) => {
             error: err
           })
         } else {
-          db.get('users')
-          .push({
-            id : shortid.generate(),
-            email: req.body.email,
-            password: hash,
-            role: req.body.role
+          createdUser = usersModel.createUser({
+            user_email : req.body.email,
+            hash : hash,
+            role : req.body.role
           })
-          .write()
 
-          return res.status(201).json({
-            message: "User created."
-          })
+          if (createdUser) {
+            return res.status(201).json({
+              message: "User created."
+            })
+          } else {
+            return res.status(500).json({
+              error: "Couldn't create user, please try again later or contact the administrator"
+            })
+          }
         }
       })
     }
@@ -128,44 +120,39 @@ exports.userUpdate = (req, res, next) => {
       })
     }
 
-    const users = db.get('users').cloneDeep()
-    const user = getUser(users, req.body.email)
+    const user = usersModel.getUser(req.body.email)
 
     if ( user ) {
-      let payload = {}
-
-      if (req.body.password) {
-        let hash = bcrypt.hashSync(req.body.password, 10)
-        payload["password"] = hash
-      }
-
-      if (req.body.new_email) {
-        payload["email"] = cryptr.encrypt(req.body.new_email)
-      }
 
       if (req.body.role) {
         if ( !(req.body.role === 'administrator') && user.role === 'administrator' ) {
-          if (db.get('users').filter({role : "administrator"}).value().length <= 1) {
+          if (usersModel.getAdministrators().length <= 1) {
             return res.status(403).json({
               error : "Cannot change role. At least one administrator must remain in the system."
             })
           }
         }
-        payload["role"] = req.body.role
       }
 
-      if (Object.keys(payload).length) {
-        db.get('users')
-        .find({ id : user.id })
-        .assign(payload)
-        .write()
+      let hash
+      if (req.body.password) {
+        hash = bcrypt.hashSync(req.body.password, 10)
+      }
 
+      let userModified = usersModel.userUpdate({
+        id : user.id,
+        user_email: req.body.new_email,
+        hash : hash,
+        role : req.body.role
+      })
+
+      if (userModified) {
         return res.status(200).json({
           message: "User updated."
         })
       } else {
-        return res.status(400).json({
-          error : "Empty payload. No changes submitted."
+        return res.status(500).json({
+          error : "Couldn't update user. Please check with administrator"
         })
       }
     } else {
@@ -191,23 +178,28 @@ exports.userDelete = (req, res, next) => {
       })
     }
 
-    const users = db.get('users').cloneDeep()
-    var user = getUser(users, req.body.email)
+    const user = usersModel.getUser(req.body.email)
 
     if (user) {
 
       // TODO: MOVE TO A FUNCTION?
-      if (user.role === 'administrator' && db.get('users').filter({role : "administrator"}).value().length <= 1) {
+      if (user.role === 'administrator' && usersModel.getAdministrators().length <= 1) {
         return res.status(403).json({
           error : "Cannot delete user. At least one administrator must remain in the system."
         })
       }
 
-      db.get('users').remove({ id : user.id }).write()
+      let deleteUser = usersModel.deleteUser(user.id)
 
-      return res.status(200).json({
-        message: "User deleted."
-      })
+      if (deleteUser) {
+        return res.status(200).json({
+          message: "User deleted."
+        })
+      } else {
+        return res.status(500).json({
+          error: "Couldn't delete user, please contact administrator"
+        })
+      }
     } else {
       return res.status(404).json({
         message: "User does not exists."

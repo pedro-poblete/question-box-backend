@@ -4,7 +4,10 @@ const router = express.Router()
 const controller = require('../controllers/questions')
 const emailChecks = require('../middleware/email')
 const checkAuth = require('../middleware/check-auth')
-const sendNotification = require('../middleware/sendNotification')
+
+const notificationsRoutes =  require('./notifications')
+const answersRoutes = require('./answers')
+
 
 // Public Route: Lists all answered questions
 router.get('/', controller.listAnsweredQuestions)
@@ -17,9 +20,6 @@ router.patch('/:questionId', controller.addAdditionalDetails)
 
 // Public Route: Update Question Number of Views
 router.patch('/:questionId/update_views', controller.updateNumberOfViews)
-
-// Public Route: Subscribe email for notifications
-router.post('/:questionId/subscribe_email', emailChecks.encryptEmail, controller.subscribeEmail)
 
 // Private Route: Get all questions (even unanswered ones) with all their associated information
 router.get('/all', checkAuth, controller.listAllQuestions)
@@ -34,9 +34,9 @@ router.patch('/:questionId/modify', checkAuth, controller.modifyQuestion)
 router.delete('/:questionId/', checkAuth, controller.deleteQuestion)
 
 // Private Route: Submit additional information / modify answer
-router.put('/:questionId/answer', checkAuth, controller.submitOrUpdateAnswer)
+router.use('/:questionId/answer', answersRoutes)
 
-// Private Route: Delete Answer
-router.delete('/:questionId/answer', checkAuth, controller.deleteAnswer)
+// Public Route: Subscribe email for notifications
+router.use('/:questionId/subscribe_email', notificationsRoutes)
 
 module.exports = router

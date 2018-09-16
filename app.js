@@ -24,7 +24,6 @@ app.use( (req, res, next) => {
 } )
 
 const questionsRoutes =  require('./api/routes/questions')
-const privateRoutes = require('./api/routes/private')
 const userRoutes = require('./api/routes/users')
 
 app.use('/questions', questionsRoutes)

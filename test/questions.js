@@ -187,7 +187,7 @@ describe('Questions', () => {
       })
     })
   })
-  describe('/questionId patch tests', () => {
+  describe('/questionId/modify patch tests', () => {
     it('it should commit changes and return 200 ', (done) => {
       chai.request(url)
       .patch('questions/' + questionId + '/modify')
