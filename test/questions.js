@@ -134,10 +134,10 @@ describe('Questions', () => {
       })
     })
   })
-  describe('/questionId/subscribe_email post tests', () => {
+  describe('/questionId/subscribe/email post tests', () => {
     it('it should register email and return 201', (done) => {
       chai.request(url)
-      .post('questions/' + questionId + '/subscribe_email')
+      .post('questions/' + questionId + '/subscribe/email')
       .send({
         email: "test@test.com",
       })
@@ -151,11 +151,38 @@ describe('Questions', () => {
     })
     it('it should return 404', (done) => {
       chai.request(url)
-      .post('questions/' + "134FG_3123151512a1" + '/subscribe_email')
+      .post('questions/' + "134FG_3123151512a1" + '/subscribe/email')
       .send({
         email: "test@test.com",
       })
       .end( (err, res) => {
+        res.should.have.status(404)
+        done()
+      })
+    })
+  })
+  describe('/questionId/subscribe/push post tests', () => {
+    it('it should register push and return 201', (done) => {
+      chai.request(url)
+      .post('questions/' + questionId + '/subscribe/push')
+      .send({
+        subscription: "SubscriptionEvent"
+      })
+      .end( (err, res) => {
+        res.should.have.status(201)
+        res.body.should.have.keys("message")
+        res.body.message.should.equal("Subscription successful.")
+        done()
+      })
+    })
+    it('it should return 404', (done) => {
+      chai.request(url)
+      .post('questions/' + "134FG_3123151512a1" + '/subscribe/push')
+      .send({
+        subscription: "SubscriptionEvent"
+      })
+      .end( (err, res) => {
+        console.log(res.body)
         res.should.have.status(404)
         done()
       })

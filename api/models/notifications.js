@@ -42,3 +42,39 @@ exports.deleteEmailNotification = (id) => {
 
     return "Ok"
 }
+
+
+exports.registerPushNotification = ({question_id, subscription}) => {
+  let notification_id = shortid.generate()
+
+  db.get('push_notifications')
+  .push({
+    id : notification_id,
+    question_id : question_id,
+    subscription : subscription
+  })
+  .write()
+
+  let push_notification = db.get('push_notifications')
+  .find({id : notification_id}).cloneDeep()
+  .value
+
+  return push_notification
+
+}
+
+exports.getPushNotificationByQuestion = (question_id) => {
+  const notification = db.get('push_notifications')
+  .find({question_id : question_id})
+  .value()
+
+  return notification
+}
+
+exports.deletePushNotification = (id) => {
+  db.get('push_notifications')
+  .remove( {id : id} )
+  .write()
+
+    return "Ok"
+}

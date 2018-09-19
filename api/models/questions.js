@@ -121,7 +121,7 @@ exports.updateQuestion = ({id, text_en, text_de, additional_details, related_que
       return question
 
     } else {
-      return null
+      return question
     }
 
   } else {

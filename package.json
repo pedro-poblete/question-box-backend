@@ -32,7 +32,8 @@
     "lowdb": "^1.0.0",
     "nodemailer": "^4.6.8",
     "shortid": "^2.2.13",
-    "validator": "^10.7.1"
+    "validator": "^10.7.1",
+    "web-push": "^3.3.3"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -4,6 +4,7 @@ const notificationsModel = require('../models/notifications')
 const answerModel = require('../models/answers')
 
 transporter = require('../../notifications/email')
+pusher = require('../../notifications/push')
 
 exports.submitOrUpdateAnswer = (req, res, next) => {
   try {
@@ -16,6 +17,8 @@ exports.submitOrUpdateAnswer = (req, res, next) => {
     if (questionAnswered) {
 
       let emailNotification = notificationsModel.getEmailNotificationByQuestion(questionAnswered.id)
+
+      let pushNotification = notificationsModel.getPushNotificationByQuestion(questionAnswered.id)
 
       if (emailNotification) {
         let receiver = cryptr.decrypt(emailNotification.email)
@@ -49,7 +52,41 @@ exports.submitOrUpdateAnswer = (req, res, next) => {
           })
         }
 
-      } else {
+      }
+
+      if (pushNotification) {
+        const subscription = pushNotification.subscription
+        let payload = {}
+
+        if (questionAnswered.text.en) {
+          payload["title"] = "Your question has been answered"
+          payload["body"] = "Click here to see the answer"
+        } else if (questionAnswered.text.de) {
+          payload["title"] = "Ihre Frage wurde beantwortet"
+          payload["body"] = "Klicken Sie hier, um die Antwort zu sehen"
+        }
+
+        payload = JSON.stringify(payload)
+
+        try {
+          pusher.sendPushNotification(subscription, payload)
+          let deletePushNotification = notificationsModel.deletePushNotification(pushNotification.id)
+          if (deletePushNotification) {
+            return res.status(200).json(questionAnswered)
+          } else {
+            return res.status(500).json({
+              err : "Something went wrong when deleting the notification"
+            })
+          }
+        }
+        catch (err) {
+          return res.status(500).json({
+            error: err.toString()
+          })
+        }
+      }
+
+      if (!(pushNotification) && !(emailNotification)) {
         return res.status(200).json(questionAnswered)
       }
 

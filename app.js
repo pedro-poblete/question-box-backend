@@ -31,6 +31,4 @@ app.use('/users', userRoutes)
 
 app.listen( port, console.log(`App running in port ${port}`) )
 
-
-
 module.exports = app; // for testing

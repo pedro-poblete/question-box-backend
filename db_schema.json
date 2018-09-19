@@ -1,5 +1,6 @@
 {
   "questions": [],
   "email_notifications": [],
+  "push_notifications" : [],
   "users": []
 }

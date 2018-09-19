@@ -6,6 +6,9 @@ const emailChecks = require('../middleware/email')
 
 
 // Public Route: Subscribe email for notifications
-router.post('/', emailChecks.encryptEmail, controller.subscribeEmail)
+router.post('/email', emailChecks.encryptEmail, controller.subscribeEmail)
+
+// Public Route: Subscribe email for notifications
+router.post('/push', controller.subscribePushNotification)
 
 module.exports = router

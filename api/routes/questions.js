@@ -37,6 +37,6 @@ router.delete('/:questionId/', checkAuth, controller.deleteQuestion)
 router.use('/:questionId/answer', answersRoutes)
 
 // Public Route: Subscribe email for notifications
-router.use('/:questionId/subscribe_email', notificationsRoutes)
+router.use('/:questionId/subscribe', notificationsRoutes)
 
 module.exports = router
